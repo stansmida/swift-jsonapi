@@ -1,7 +1,7 @@
 import JSONAPI
 import XCTest
 
-typealias SimpleDocument<Data, Included> = DecodableDocument<Data, Never, Never, Never, Never, Included> where Data: _PrimaryData, Data: Decodable, Included: _Included, Included: Decodable
+typealias SimpleDocument<Data, Included> = Document<Data, Never, Never, Never, Never, Included, Never> where Data: _PrimaryData, Data: Decodable, Included: _Included, Included: Decodable
 
 /// Round trip tests.
 final class DocumentTests: XCTestCase {
@@ -1072,12 +1072,12 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        do {
-            _ = try JSONDecoder().decode(Document<User.ResourceObject, Never, Never, Never, Never, DecodableIncluded, FailureResponse>.self, from: encoded)
-            XCTFail("Should early exit with error document thrown.")
-        } catch let error as Document<Never, [MyError], Never, Never, Never, Never, Never> {
-            let errors = error.errors
-            XCTAssertEqual(errors, [errorObject])
+        let decoded = try JSONDecoder().decode(DecodableDocument<Document<User.ResourceObject, Never, Never, Never, Never, DecodableIncluded, FailureResponse>>.self, from: encoded)
+        switch decoded {
+            case .success: 
+                XCTFail()
+            case .failure(let errorDocument):
+                XCTAssertEqual(errorDocument.errors, [errorObject])
         }
     }
 }

@@ -21,14 +21,14 @@ extension Never: Codable {
 @available(macCatalyst, obsoleted: 15.0, message: "This API is available directly in the language since this obsoletion.")
 @available(tvOS, obsoleted: 15.0, message: "This API is available directly in the language since this obsoletion.")
 @available(watchOS, obsoleted: 8.0, message: "This API is available directly in the language since this obsoletion.")
-extension Never: Identifiable {
+extension Never: @retroactive Identifiable {
     public var id: Never { fatalError() }
 }
 
 // MARK: LosslessStringConvertible
 // The below allows to pass `Never?.none` to a generic parameter constrained to `LosslessStringConvertible`.
 
-extension Optional: CustomStringConvertible where Wrapped == Never {
+extension Optional: @retroactive CustomStringConvertible where Wrapped == Never {
     public var description: String {
         switch self {
             case .none: "nil"
@@ -37,18 +37,19 @@ extension Optional: CustomStringConvertible where Wrapped == Never {
     }
 }
 
-extension Optional: LosslessStringConvertible where Wrapped == Never {
+extension Optional: @retroactive LosslessStringConvertible where Wrapped == Never {
     public init?(_ description: String) { nil }
 }
 
-extension Never: LosslessStringConvertible {
+extension Never: @retroactive CustomStringConvertible {}
+extension Never: @retroactive LosslessStringConvertible {
     public init?(_ description: String) { nil }
     public var description: String { fatalError() }
 }
 
 // MARK: Sequence
 // The below allows to iterate over Document.Errors
-extension Never: Sequence {
+extension Never: @retroactive Sequence {
     public func makeIterator() -> NeverIterator { .init() }
 }
 

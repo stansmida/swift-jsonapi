@@ -219,19 +219,48 @@ public struct DecodableIncluded: _Included, Decodable {
 
 public extension Document where Included == DecodableIncluded {
 
-    /// nullable resource object primary data, to-one
+    // The above included methods come in pairs, where the only difference is that the first variant
+    // decoded the default type. With default parameter like this
+    //
+    // func included<Referencing, Relationship, Referenced>(
+    //   _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+    //   via keyPath: KeyPath<Referencing.Relationships, Relationship>
+    // ) throws -> Referenced? where Data == Optional<Referencing>, Referencing: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject { ...
+    //
+    // the code compiles but the compiler is unable to infer the result type and fallbacks to `Any`, e.g.
+    // let image = document.included(via: \.avatarID) // `image` is `Any`.
+    // let image: Image = document.included(via: \.avatarID) // compiles but requires the explicit typing
+
+    // nullable resource object primary data, to-one
+    
+    @inlinable
+    func included<Referencing, Relationship>(
+        via keyPath: KeyPath<Referencing.Relationships, Relationship>
+    ) throws -> Relationship.ResourceRepresentable.ResourceObject? where Data == Optional<Referencing>, Referencing: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         via keyPath: KeyPath<Referencing.Relationships, Relationship>
     ) throws -> Referenced? where Data == Optional<Referencing>, Referencing: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
         try included(type, for: data, via: keyPath)
     }
 
-    /// nullable resource object, to-one
+    // nullable resource object, to-one
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        for resourceObject: some _Optional<Referencing>,
+        via keyPath: KeyPath<Referencing.Relationships, Relationship>
+    ) throws -> Relationship.ResourceRepresentable.ResourceObject? where Referencing: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, for: resourceObject, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         for resourceObject: some _Optional<Referencing>,
         via keyPath: KeyPath<Referencing.Relationships, Relationship>
     ) throws -> Referenced? where Referencing: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
@@ -241,19 +270,36 @@ public extension Document where Included == DecodableIncluded {
         return try included(type, for: resourceObject, via: keyPath)
     }
 
-    /// nullable resource object primary data, nullable to-one
+    // nullable resource object primary data, nullable to-one
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        via keyPath: KeyPath<Referencing.Relationships, some _Optional<Relationship>>
+    ) throws -> Relationship.ResourceRepresentable.ResourceObject? where Data == Optional<Referencing>, Referencing: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         via keyPath: KeyPath<Referencing.Relationships, some _Optional<Relationship>>
     ) throws -> Referenced? where Data == Optional<Referencing>, Referencing: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
         try included(type, for: data, via: keyPath)
     }
 
-    /// nullable resource object, nullable to-one
+    // nullable resource object, nullable to-one
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        for resourceObject: some _Optional<Referencing>,
+        via keyPath: KeyPath<Referencing.Relationships, some _Optional<Relationship>>
+    ) throws -> Relationship.ResourceRepresentable.ResourceObject? where Referencing: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, for: resourceObject, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         for resourceObject: some _Optional<Referencing>,
         via keyPath: KeyPath<Referencing.Relationships, some _Optional<Relationship>>
     ) throws -> Referenced? where Referencing: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
@@ -263,19 +309,36 @@ public extension Document where Included == DecodableIncluded {
         return try included(type, for: resourceObject, via: keyPath)
     }
     
-    /// nullable resource object primary data, to-many
+    // nullable resource object primary data, to-many
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        via keyPath: KeyPath<Referencing.Relationships, Relationship>
+    ) throws -> [Relationship.ResourceRepresentable.ResourceObject]? where Data == Optional<Referencing>, Referencing: _ResourceObject, Relationship: _ToMany {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         via keyPath: KeyPath<Referencing.Relationships, Relationship>
     ) throws -> [Referenced]? where Data == Optional<Referencing>, Referencing: _ResourceObject, Relationship: _ToMany, Referenced: _ResourceObject {
         try included(type, for: data, via: keyPath)
     }
 
-    /// nullable resource object, to-many
+    // nullable resource object, to-many
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        for resourceObject: some _Optional<Referencing>,
+        via keyPath: KeyPath<Referencing.Relationships, Relationship>
+    ) throws -> [Relationship.ResourceRepresentable.ResourceObject]? where Referencing: _ResourceObject, Relationship: _ToMany {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, for: resourceObject, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         for resourceObject: some _Optional<Referencing>,
         via keyPath: KeyPath<Referencing.Relationships, Relationship>
     ) throws -> [Referenced]? where Referencing: _ResourceObject, Relationship: _ToMany, Referenced: _ResourceObject {
@@ -285,19 +348,36 @@ public extension Document where Included == DecodableIncluded {
         return try included(type, for: resourceObject, via: keyPath)
     }
 
-    /// single resource object primary data, to-one
+    // single resource object primary data, to-one
+
+    @inlinable
+    func included<Relationship>(
+        via keyPath: KeyPath<Data.Relationships, Relationship>
+    ) throws -> Relationship.ResourceRepresentable.ResourceObject where Data: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, via: keyPath)
+    }
+
     @inlinable
     func included<Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         via keyPath: KeyPath<Data.Relationships, Relationship>
     ) throws -> Referenced where Data: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
         try included(type, for: data, via: keyPath)
     }
 
-    /// single resource object, to-one
+    // single resource object, to-one
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        for resourceObject: Referencing,
+        via keyPath: KeyPath<Referencing.Relationships, Relationship>
+    ) throws -> Relationship.ResourceRepresentable.ResourceObject where Referencing: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, for: resourceObject, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         for resourceObject: Referencing,
         via keyPath: KeyPath<Referencing.Relationships, Relationship>
     ) throws -> Referenced where Referencing: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
@@ -308,19 +388,36 @@ public extension Document where Included == DecodableIncluded {
         return try Referenced(from: container)
     }
 
-    /// single resource object primary data, nullable to-one
+    // single resource object primary data, nullable to-one
+
+    @inlinable
+    func included<Relationship>(
+        via keyPath: KeyPath<Data.Relationships, some _Optional<Relationship>>
+    ) throws -> Relationship.ResourceRepresentable.ResourceObject? where Data: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, via: keyPath)
+    }
+
     @inlinable
     func included<Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         via keyPath: KeyPath<Data.Relationships, some _Optional<Relationship>>
     ) throws -> Referenced? where Data: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
         try included(type, for: data, via: keyPath)
     }
 
-    /// single resource object, nullable to-one
+    // single resource object, nullable to-one
+    
+    @inlinable
+    func included<Referencing, Relationship>(
+        for resourceObject: Referencing,
+        via keyPath: KeyPath<Referencing.Relationships, some _Optional<Relationship>>
+    ) throws -> Relationship.ResourceRepresentable.ResourceObject? where Referencing: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, for: resourceObject, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         for resourceObject: Referencing,
         via keyPath: KeyPath<Referencing.Relationships, some _Optional<Relationship>>
     ) throws -> Referenced? where Referencing: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
@@ -333,19 +430,36 @@ public extension Document where Included == DecodableIncluded {
         return try Referenced(from: container)
     }
 
-    /// single resource object primary data, to-many
+    // single resource object primary data, to-many
+
+    @inlinable
+    func included<Relationship>(
+        via keyPath: KeyPath<Data.Relationships, Relationship>
+    ) throws -> [Relationship.ResourceRepresentable.ResourceObject] where Data: _ResourceObject, Relationship: _ToMany {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, via: keyPath)
+    }
+
     @inlinable
     func included<Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         via keyPath: KeyPath<Data.Relationships, Relationship>
     ) throws -> [Referenced] where Data: _ResourceObject, Relationship: _ToMany, Referenced: _ResourceObject {
         try included(type, for: data, via: keyPath)
     }
 
-    /// single resource object, to-many
+    // single resource object, to-many
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        for resourceObject: Referencing,
+        via keyPath: KeyPath<Referencing.Relationships, Relationship>
+    ) throws -> [Relationship.ResourceRepresentable.ResourceObject] where Referencing: _ResourceObject, Relationship: _ToMany {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, for: resourceObject, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         for resourceObject: Referencing,
         via keyPath: KeyPath<Referencing.Relationships, Relationship>
     ) throws -> [Referenced] where Referencing: _ResourceObject, Relationship: _ToMany, Referenced: _ResourceObject {
@@ -358,57 +472,108 @@ public extension Document where Included == DecodableIncluded {
         }
     }
 
-    /// array of resource objects primary data, to-one
+    // array of resource objects primary data, to-one
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        via keyPath: KeyPath<Referencing.Relationships, Relationship>
+    ) throws -> [Relationship.ResourceRepresentable.ResourceObject] where Data: Sequence<Referencing>, Referencing: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         via keyPath: KeyPath<Referencing.Relationships, Relationship>
     ) throws -> [Referenced] where Data: Sequence<Referencing>, Referencing: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
         try included(type, for: data, via: keyPath)
     }
 
-    /// array of resource objects, to-one
+    // array of resource objects, to-one
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        for resourceObject: some Sequence<Referencing>,
+        via keyPath: KeyPath<Referencing.Relationships, Relationship>
+    ) throws -> [Relationship.ResourceRepresentable.ResourceObject] where Referencing: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self.self, for: resourceObject, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         for resourceObject: some Sequence<Referencing>,
         via keyPath: KeyPath<Referencing.Relationships, Relationship>
     ) throws -> [Referenced] where Referencing: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
         try resourceObject.map({ try included(type, for: $0, via: keyPath) })
     }
 
-    /// array of resource objects primary data, nullable to-one
+    // array of resource objects primary data, nullable to-one
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        via keyPath: KeyPath<Referencing.Relationships, some _Optional<Relationship>>
+    ) throws -> [Relationship.ResourceRepresentable.ResourceObject?] where Data: Sequence<Referencing>, Referencing: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         via keyPath: KeyPath<Referencing.Relationships, some _Optional<Relationship>>
     ) throws -> [Referenced?] where Data: Sequence<Referencing>, Referencing: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
         try included(type, for: data, via: keyPath)
     }
 
-    /// array of resource objects, nullable to-one
+    // array of resource objects, nullable to-one
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        for resourceObject: some Sequence<Referencing>,
+        via keyPath: KeyPath<Referencing.Relationships, some _Optional<Relationship>>
+    ) throws -> [Relationship.ResourceRepresentable.ResourceObject?] where Referencing: _ResourceObject, Relationship: _ToOne {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, for: resourceObject, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         for resourceObject: some Sequence<Referencing>,
         via keyPath: KeyPath<Referencing.Relationships, some _Optional<Relationship>>
     ) throws -> [Referenced?] where Referencing: _ResourceObject, Relationship: _ToOne, Referenced: _ResourceObject {
         try resourceObject.map({ try included(type, for: $0, via: keyPath) })
     }
 
-    /// array of resource objects primary data, to-many
+    // array of resource objects primary data, to-many
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        via keyPath: KeyPath<Referencing.Relationships, Relationship>
+    ) throws -> [[Relationship.ResourceRepresentable.ResourceObject]] where Data: Sequence<Referencing>, Referencing: _ResourceObject, Relationship: _ToMany {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         via keyPath: KeyPath<Referencing.Relationships, Relationship>
     ) throws -> [[Referenced]] where Data: Sequence<Referencing>, Referencing: _ResourceObject, Relationship: _ToMany, Referenced: _ResourceObject {
         try included(type, for: data, via: keyPath)
     }
 
-    /// array of resource objects, to-many
+    // array of resource objects, to-many
+
+    @inlinable
+    func included<Referencing, Relationship>(
+        for resourceObject: some Sequence<Referencing>,
+        via keyPath: KeyPath<Referencing.Relationships, Relationship>
+    ) throws -> [[Relationship.ResourceRepresentable.ResourceObject]] where Referencing: _ResourceObject, Relationship: _ToMany {
+        try included(Relationship.ResourceRepresentable.ResourceObject.self, for: resourceObject, via: keyPath)
+    }
+
     @inlinable
     func included<Referencing, Relationship, Referenced>(
-        _ type: Referenced.Type = Relationship.ResourceRepresentable.ResourceObject.self,
+        _ type: Referenced.Type,
         for resourceObject: some Sequence<Referencing>,
         via keyPath: KeyPath<Referencing.Relationships, Relationship>
     ) throws -> [[Referenced]] where Referencing: _ResourceObject, Relationship: _ToMany, Referenced: _ResourceObject {

@@ -2,7 +2,7 @@
 import Foundation
 
 public typealias DecodableDocument<T>
-= Result<T, T.ErrorDocument> where T: _Document, T: Decodable,
+= Result<T, T.ErrorDocument> where T: DocumentType, T: Decodable,
 T.ErrorDocument: Error, T.ErrorDocument: Decodable,
 T.Data: _PrimaryData, T.Data: Decodable,
 T.Meta: Decodable,
@@ -11,8 +11,9 @@ T.Links: Decodable,
 T.Included: _Included, T.Included: Decodable,
 T.FailureResponse: _FailureResponse
 
-public protocol _Document {
-    associatedtype ErrorDocument: _Document
+/// A helper protocol to work with ``Document`` generics until Swift gains parametrized generics.
+public protocol DocumentType {
+    associatedtype ErrorDocument: DocumentType
     associatedtype Data: _PrimaryData
     associatedtype Errors: _Errors
     associatedtype Meta
@@ -23,10 +24,10 @@ public protocol _Document {
 }
 
 /// - Todo: Extensions don't have their generic parameter yet. These could perhaps get a variadic parameter `each Extension`?
-public struct Document<Data, Errors, Meta, JSONAPI, Links, Included, FailureResponse>: _Document where Data: _PrimaryData,
-                                                                                                       Errors: _Errors,
-                                                                                                       Included: _Included,
-                                                                                                       FailureResponse: _FailureResponse {
+public struct Document<Data, Errors, Meta, JSONAPI, Links, Included, FailureResponse>: DocumentType where Data: _PrimaryData,
+                                                                                                          Errors: _Errors,
+                                                                                                          Included: _Included,
+                                                                                                          FailureResponse: _FailureResponse {
 
     /// A type that represents an error document version of the expected document.
     ///

@@ -443,7 +443,7 @@ final class DocumentTests: XCTestCase {
         )
         let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject?, DecodableIncluded>.self, from: encoded)
         XCTAssertNil(decoded.data)
-        XCTAssertEqual(try decoded.included(Image.ResourceObject.self, via: \.avatarID), nil)
+        XCTAssertEqual(try decoded.included(via: \.avatarID), nil)
     }
 
     func testNilNullableCompoundPrimaryData_variantResourceObject() throws {
@@ -464,7 +464,7 @@ final class DocumentTests: XCTestCase {
         )
         let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject?, DecodableIncluded>.self, from: encoded)
         XCTAssertNil(decoded.data)
-        XCTAssertEqual(try decoded.included(Image.ResourceObject.self, via: \.avatarID), nil)
+        XCTAssertEqual(try decoded.included(via: \.avatarID), nil)
     }
 
     func testNonNilNullableCompoundPrimaryData_variantResourceRepresentable() throws {
@@ -675,7 +675,7 @@ final class DocumentTests: XCTestCase {
         )
         let decoded = try JSONDecoder().decode(SimpleDocument<[User.ResourceObject], DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, [])
-        XCTAssertEqual(try decoded.included(Image.ResourceObject.self, via: \.avatarID), [])
+        XCTAssertEqual(try decoded.included(via: \.avatarID), [])
     }
 
     func testEmptyCollectionOfResourcesCompoundPrimaryData_variantResourceObject() throws {
@@ -698,7 +698,7 @@ final class DocumentTests: XCTestCase {
         )
         let decoded = try JSONDecoder().decode(SimpleDocument<[User.ResourceObject], DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, [])
-        XCTAssertEqual(try decoded.included(Image.ResourceObject.self, via: \.avatarID), [])
+        XCTAssertEqual(try decoded.included(via: \.avatarID), [])
     }
 
     func testCollectionOfResourcesCompoundPrimaryData_variantResourceRepresentable() throws {
@@ -1027,28 +1027,27 @@ final class DocumentTests: XCTestCase {
         let decoded = try JSONDecoder().decode(SimpleDocument<Article.ResourceObject, DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, article.resourceObject)
         // Direct relationships
-        #warning("does the inference work in Swift 6?")
-        let decodedAuthor = try decoded.included(User.ResourceObject.self, via: \.authorID)
+        let decodedAuthor = try decoded.included(via: \.authorID)
         XCTAssertEqual(decodedAuthor, User(id: article.authorID, avatarID: nil, name: "User name").resourceObject)
-        let decodedCoverImage = try decoded.included(Image.ResourceObject.self, via: \.coverImageID)
+        let decodedCoverImage = try decoded.included(via: \.coverImageID)
         XCTAssertEqual(decodedCoverImage, Image(id: 2, creatorID: 4).resourceObject)
-        let decodedAttachments = try decoded.included(Image.ResourceObject.self, via: \.attachmentIDs)
+        let decodedAttachments = try decoded.included(via: \.attachmentIDs)
         XCTAssertEqual(decodedAttachments, [])
-        let decodedComments = try decoded.included(Comment.ResourceObject.self, via: \.commentIDs)
+        let decodedComments = try decoded.included(via: \.commentIDs)
         XCTAssertEqual(
             decodedComments,
             [Comment(id: 10, text: "Comment text", userID: 8).resourceObject, Comment(id: 11, text: "Comment text", userID: 8).resourceObject]
         )
         // Indirect relationships
-        let decodedAuthorAvatar = try decoded.included(Image.ResourceObject.self, for: decodedAuthor, via: \.avatarID)
+        let decodedAuthorAvatar = try decoded.included(for: decodedAuthor, via: \.avatarID)
         XCTAssertEqual(decodedAuthorAvatar, nil)
-        let decodedCoverImageCreator = try decoded.included(User.ResourceObject.self, for: decodedCoverImage, via: \.creatorID)
+        let decodedCoverImageCreator = try decoded.included(for: decodedCoverImage, via: \.creatorID)
         XCTAssertEqual(decodedCoverImageCreator, User(id: 4, avatarID: 7, name: "Image 2 author").resourceObject)
-        let decodedCoverImageCreatorAvatar = try decoded.included(Image.ResourceObject.self, for: decodedCoverImageCreator, via: \.avatarID)
+        let decodedCoverImageCreatorAvatar = try decoded.included(for: decodedCoverImageCreator, via: \.avatarID)
         XCTAssertEqual(decodedCoverImageCreatorAvatar, Image(id: 7, creatorID: 10).resourceObject)
-        let decodedAttachmentsCreators = try decoded.included(User.ResourceObject.self, for: decodedAttachments, via: \.creatorID)
+        let decodedAttachmentsCreators = try decoded.included(for: decodedAttachments, via: \.creatorID)
         XCTAssertEqual(decodedAttachmentsCreators, [])
-        let decodedCommentsUsers = try decoded.included(User.ResourceObject.self, for: decodedComments, via: \.userID)
+        let decodedCommentsUsers = try decoded.included(for: decodedComments, via: \.userID)
         XCTAssertEqual(decodedCommentsUsers, [User(id: 8, avatarID: nil, name: "Comment author").resourceObject, User(id: 8, avatarID: nil, name: "Comment author").resourceObject])
     }
 

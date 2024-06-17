@@ -14,7 +14,9 @@ extension Array: _PrimaryData where Element: _ResourceObject {
     public typealias ResourceObjectType = Element
 }
 
-extension Never: _PrimaryData {}
+extension Never: _PrimaryData {
+    public typealias ResourceObjectType = Never
+}
 
 extension Optional: _PrimaryData where Wrapped: _ResourceObject {
     public typealias ResourceObjectType = Wrapped

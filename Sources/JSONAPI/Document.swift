@@ -13,8 +13,8 @@ public protocol DocumentType {
 
 /// - Todo: Extensions don't have their generic parameter yet. These could perhaps get a variadic parameter `each Extension`?
 public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentType where Data: _PrimaryData,
-                                                                                                          Errors: _Errors,
-                                                                                                          Included: _Included {
+                                                                                         Errors: _Errors,
+                                                                                         Included: _Included {
 
     /// Create an encodable document where primary data is a single resource object.
     public init<T>(
@@ -24,9 +24,9 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
         links: @autoclosure () -> Links = fatalError()
     ) where T: _ResourceObjectConvertible, Data == T.ResourceObject?,
             Errors == Never,
-            Meta: Encodable,
-            JSONAPI: Encodable,
-            Links: Encodable,
+            Meta: Swift.Encodable,
+            JSONAPI: Swift.Encodable,
+            Links: Swift.Encodable,
             Included == Never {
         self._data = data?.resourceObject
         if Meta.self != Never.self { _meta = meta() }
@@ -47,9 +47,9 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
         jsonAPI: @autoclosure () -> JSONAPI = fatalError(),
         links: @autoclosure () -> Links = fatalError()
     ) where Errors == Never,
-            Meta: Encodable,
-            JSONAPI: Encodable,
-            Links: Encodable,
+            Meta: Swift.Encodable,
+            JSONAPI: Swift.Encodable,
+            Links: Swift.Encodable,
             Included == EncodableIncluded {
         self._data = data?.resourceObjects.first
         if Meta.self != Never.self { _meta = meta() }
@@ -72,9 +72,9 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
         links: @autoclosure () -> Links = fatalError()
     ) where T: _ResourceObjectConvertible, Data == [T.ResourceObject],
             Errors == Never,
-            Meta: Encodable,
-            JSONAPI: Encodable,
-            Links: Encodable,
+            Meta: Swift.Encodable,
+            JSONAPI: Swift.Encodable,
+            Links: Swift.Encodable,
             Included == Never {
         self._data = data.map(\.resourceObject)
         if Meta.self != Never.self { _meta = meta() }
@@ -96,9 +96,9 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
         links: @autoclosure () -> Links = fatalError()
     ) where Data == Array<T>,
             Errors == Never,
-            Meta: Encodable,
-            JSONAPI: Encodable,
-            Links: Encodable,
+            Meta: Swift.Encodable,
+            JSONAPI: Swift.Encodable,
+            Links: Swift.Encodable,
             Included == EncodableIncluded {
         self._data = data.resourceObjects
         if Meta.self != Never.self { _meta = meta() }
@@ -120,8 +120,8 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
         jsonAPI: @autoclosure () -> JSONAPI = fatalError()
     ) where Data == Never,
             E: _ErrorObject, Errors == [E],
-            Meta: Encodable,
-            JSONAPI: Encodable,
+            Meta: Swift.Encodable,
+            JSONAPI: Swift.Encodable,
             Links == Never,
             Included == Never {
         self._errors = [error]
@@ -136,8 +136,8 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
         jsonAPI: @autoclosure () -> JSONAPI = fatalError()
     ) where Data == Never,
             E: _ErrorObject, Errors == [E],
-            Meta: Encodable,
-            JSONAPI: Encodable,
+            Meta: Swift.Encodable,
+            JSONAPI: Swift.Encodable,
             Links == Never,
             Included == Never {
         self._errors = errors
@@ -169,7 +169,7 @@ private extension Document {
     }
 }
 
-extension Document: Encodable where Data: Encodable, Meta: Encodable, JSONAPI: Encodable, Links: Encodable, Included: Encodable {
+extension Document: Encodable where Data: Swift.Encodable, Meta: Swift.Encodable, JSONAPI: Swift.Encodable, Links: Swift.Encodable, Included: Swift.Encodable {
 
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKey.self)
@@ -340,7 +340,7 @@ extension Document: Decodable where Data: Decodable, Meta: Decodable, JSONAPI: D
     }
 }
 
-// MARK: -
+// MARK: - Document variant types
 
 /// A `Result` wrapper for a "success" document and its "failure" variant when decoding an expected document.
 ///
@@ -374,6 +374,28 @@ public extension Document where Self: Decodable, Errors.Element == Never {
     /// Returns a failable document type, that can result in an error variant of the document defined by `FailureResponse`.
     typealias FailableWith<FailureResponse> = FailableDocument<Self, FailureResponse> where FailureResponse: _FailureResponse
 }
+
+public extension Document where Data: Codable, Errors: Codable, Meta: Codable, JSONAPI: Codable, Links: Codable, Included == DecodableIncluded {
+
+    /// Document with `included` member can't be `Encodable` and `Decodable` at the same time due to a dynamic nature
+    /// of `EncodableDocument` and `DecodableIncluded`. This allows you for a quick conversion from a decodable
+    /// document type with `included` member to its encodable variant.
+    ///
+    /// - Important: This type can shadow `Swift.Encodable` when working within the document which can result
+    /// in a compile error. In such cases, refer to `Encodable` protocol with qualified symbol (`Swift.Encodable`), e.g.
+    /// ```swift
+    /// extension Document: @retroactive AsyncResponseEncodable where Self: Swift.Encodable {
+    ///
+    ///     public func encodeResponse(for request: Vapor.Request) async throws -> Vapor.Response {
+    ///         let response = Response()
+    ///         try response.content.encode(self, as: .jsonAPI)
+    ///         return response
+    ///     }
+    /// }
+    /// ```
+    typealias Encodable = Document<Data, Errors, Meta, JSONAPI, Links, EncodableIncluded>
+}
+
 
 // MARK: - Utils
 

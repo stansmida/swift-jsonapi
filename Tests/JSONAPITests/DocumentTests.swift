@@ -1,7 +1,9 @@
 import JSONAPI
 import XCTest
 
-typealias SimpleDocument<Data, Included> = Document<Data, Never, Never, Never, Never, Included, Never> where Data: _PrimaryData, Data: Decodable, Included: _Included, Included: Decodable
+typealias MyDocument<Data, Included> = Document<Data, Never, Never, Never, Never, Included> where Data: _PrimaryData, Data: Decodable, Included: _Included, Included: Decodable
+typealias MyError = ErrorObject<UUID, Never, Never, Int, String, Never, Never, Never>
+typealias MyFailureResponse = FailureResponse<MyError, Never>
 
 /// Round trip tests.
 final class DocumentTests: XCTestCase {
@@ -21,7 +23,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject?, Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject?, Never>.self, from: encoded)
         XCTAssertNil(decoded.data)
     }
 
@@ -38,7 +40,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject?, Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject?, Never>.self, from: encoded)
         XCTAssertNil(decoded.data)
     }
 
@@ -55,7 +57,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<ResourceIdentifierObject<User, User.Meta>?, Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<ResourceIdentifierObject<User, User.Meta>?, Never>.self, from: encoded)
         XCTAssertNil(decoded.data)
     }
 
@@ -87,7 +89,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject?, Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject?, Never>.self, from: encoded)
         XCTAssertEqual(decoded.data.map(User.init), user)
     }
 
@@ -119,7 +121,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject?, Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject?, Never>.self, from: encoded)
         XCTAssertEqual(decoded.data.map(User.init), user)
     }
 
@@ -140,7 +142,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<ResourceIdentifierObject<User, User.Meta>?, Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<ResourceIdentifierObject<User, User.Meta>?, Never>.self, from: encoded)
         XCTAssertEqual(decoded.data, user.resourceIdentifierObject)
     }
 
@@ -172,7 +174,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject, Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject, Never>.self, from: encoded)
         XCTAssertEqual(User(decoded.data), user)
     }
 
@@ -204,7 +206,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject, Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject, Never>.self, from: encoded)
         XCTAssertEqual(User(decoded.data), user)
     }
 
@@ -225,7 +227,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<ResourceIdentifierObject<User, User.Meta>, Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<ResourceIdentifierObject<User, User.Meta>, Never>.self, from: encoded)
         XCTAssertEqual(decoded.data, user.resourceIdentifierObject)
     }
 
@@ -245,7 +247,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<[User.ResourceObject], Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<[User.ResourceObject], Never>.self, from: encoded)
         XCTAssertEqual(decoded.data, users.map(\.resourceObject))
     }
 
@@ -265,7 +267,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<[User.ResourceObject], Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<[User.ResourceObject], Never>.self, from: encoded)
         XCTAssertEqual(decoded.data, users.map(\.resourceObject))
     }
 
@@ -285,7 +287,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<[ResourceIdentifierObject<User, User.Meta>], Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<[ResourceIdentifierObject<User, User.Meta>], Never>.self, from: encoded)
         XCTAssertEqual(decoded.data, users.map(\.resourceIdentifierObject))
     }
 
@@ -337,7 +339,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<[User.ResourceObject], Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<[User.ResourceObject], Never>.self, from: encoded)
         XCTAssertEqual(decoded.data, users.map(\.resourceObject))
     }
 
@@ -389,7 +391,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<[User.ResourceObject], Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<[User.ResourceObject], Never>.self, from: encoded)
         XCTAssertEqual(decoded.data, users.map(\.resourceObject))
     }
 
@@ -419,7 +421,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<[ResourceIdentifierObject<User, User.Meta>], Never>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<[ResourceIdentifierObject<User, User.Meta>], Never>.self, from: encoded)
         XCTAssertEqual(decoded.data, users.map(\.resourceIdentifierObject))
     }
 
@@ -441,7 +443,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject?, DecodableIncluded>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject?, DecodableIncluded>.self, from: encoded)
         XCTAssertNil(decoded.data)
         XCTAssertEqual(try decoded.included(via: \.avatarID), nil)
     }
@@ -462,7 +464,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject?, DecodableIncluded>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject?, DecodableIncluded>.self, from: encoded)
         XCTAssertNil(decoded.data)
         XCTAssertEqual(try decoded.included(via: \.avatarID), nil)
     }
@@ -509,7 +511,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject?, DecodableIncluded>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject?, DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, user.resourceObject)
         XCTAssertEqual(try decoded.included(via: \.avatarID), Image(id: 0, creatorID: 0).resourceObject)
     }
@@ -556,7 +558,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject?, DecodableIncluded>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject?, DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, user)
         XCTAssertEqual(try decoded.included(via: \.avatarID), Image(id: 0, creatorID: 0).resourceObject)
     }
@@ -603,7 +605,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject, DecodableIncluded>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject, DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, user.resourceObject)
         XCTAssertEqual(try decoded.included(via: \.avatarID), Image(id: 0, creatorID: 0).resourceObject)
     }
@@ -650,7 +652,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<User.ResourceObject, DecodableIncluded>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject, DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, user)
         XCTAssertEqual(try decoded.included(via: \.avatarID), Image(id: 0, creatorID: 0).resourceObject)
     }
@@ -673,7 +675,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<[User.ResourceObject], DecodableIncluded>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<[User.ResourceObject], DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, [])
         XCTAssertEqual(try decoded.included(via: \.avatarID), [])
     }
@@ -696,7 +698,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<[User.ResourceObject], DecodableIncluded>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<[User.ResourceObject], DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, [])
         XCTAssertEqual(try decoded.included(via: \.avatarID), [])
     }
@@ -776,7 +778,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<[User.ResourceObject], DecodableIncluded>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<[User.ResourceObject], DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, users.map(\.resourceObject))
         XCTAssertEqual(try decoded.included(via: \.avatarID), users.map({ Image(id: $0.avatarID!, creatorID: 0).resourceObject }))
     }
@@ -856,7 +858,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<[User.ResourceObject], DecodableIncluded>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<[User.ResourceObject], DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, users.map(\.resourceObject))
         XCTAssertEqual(try decoded.included(via: \.avatarID), users.map({ Image(id: $0.relationships.avatarID!.data.id, creatorID: 0).resourceObject }))
     }
@@ -1024,7 +1026,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(SimpleDocument<Article.ResourceObject, DecodableIncluded>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<Article.ResourceObject, DecodableIncluded>.self, from: encoded)
         XCTAssertEqual(decoded.data, article.resourceObject)
         // Direct relationships
         let decodedAuthor = try decoded.included(via: \.authorID)
@@ -1051,9 +1053,42 @@ final class DocumentTests: XCTestCase {
         XCTAssertEqual(decodedCommentsUsers, [User(id: 8, avatarID: nil, name: "Comment author").resourceObject, User(id: 8, avatarID: nil, name: "Comment author").resourceObject])
     }
 
-    func testFailureResponse() throws {
-        typealias MyError = ErrorObject<UUID, Never, Never, Int, String, Never, Never, Never>
-        typealias FailureResponse = JSONAPI.FailureResponse<MyError, Never>
+    func testFailableDocument_success() throws {
+        let user = User(id: 0, avatarID: 0, name: "John Doe")
+        let document = Document(data: user)
+        let encoded = try JSONEncoder.pretty.encode(document)
+        XCTAssertEqual(
+            encoded.uft8String,
+            """
+            {
+              "data" : {
+                "attributes" : {
+                  "name" : "John Doe"
+                },
+                "id" : "0",
+                "relationships" : {
+                  "avatarID" : {
+                    "data" : {
+                      "id" : "0",
+                      "type" : "image"
+                    }
+                  }
+                },
+                "type" : "user"
+              }
+            }
+            """
+        )
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject, Never>.FailableWith<MyFailureResponse>.self, from: encoded)
+        switch decoded {
+            case .success(let successDocument):
+                XCTAssertEqual(successDocument.data, user.resourceObject)
+            case .failure:
+                XCTFail()
+        }
+    }
+
+    func testFailableDocument_failure() throws {
         let errorObject = MyError(id: UUID(uuidString: "AFA1C80F-0393-48A8-8A52-34B84A85B1CC")!, code: 123, title: "Whoops!")
         let document = Document(error: errorObject)
         let encoded = try JSONEncoder.pretty.encode(document)
@@ -1071,7 +1106,7 @@ final class DocumentTests: XCTestCase {
             }
             """
         )
-        let decoded = try JSONDecoder().decode(DecodableDocument<Document<User.ResourceObject, Never, Never, Never, Never, DecodableIncluded, FailureResponse>>.self, from: encoded)
+        let decoded = try JSONDecoder().decode(MyDocument<User.ResourceObject, DecodableIncluded>.FailableWith<MyFailureResponse>.self, from: encoded)
         switch decoded {
             case .success: 
                 XCTFail()

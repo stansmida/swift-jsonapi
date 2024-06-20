@@ -1,47 +1,20 @@
 // https://jsonapi.org/format/#document-structure
 import Foundation
 
-public typealias DecodableDocument<T>
-= Result<T, T.ErrorDocument> where T: DocumentType, T: Decodable,
-T.ErrorDocument: Error, T.ErrorDocument: Decodable,
-T.Data: _PrimaryData, T.Data: Decodable,
-T.Meta: Decodable,
-T.JSONAPI: Decodable,
-T.Links: Decodable,
-T.Included: _Included, T.Included: Decodable,
-T.FailureResponse: _FailureResponse
-
 /// A helper protocol to work with ``Document`` generics until Swift gains parametrized generics.
 public protocol DocumentType {
-    associatedtype ErrorDocument: DocumentType
     associatedtype Data: _PrimaryData
     associatedtype Errors: _Errors
     associatedtype Meta
     associatedtype JSONAPI
     associatedtype Links
     associatedtype Included: _Included
-    associatedtype FailureResponse: _FailureResponse
 }
 
 /// - Todo: Extensions don't have their generic parameter yet. These could perhaps get a variadic parameter `each Extension`?
-public struct Document<Data, Errors, Meta, JSONAPI, Links, Included, FailureResponse>: DocumentType where Data: _PrimaryData,
+public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentType where Data: _PrimaryData,
                                                                                                           Errors: _Errors,
-                                                                                                          Included: _Included,
-                                                                                                          FailureResponse: _FailureResponse {
-
-    /// A type that represents an error document version of the expected document.
-    ///
-    /// https://jsonapi.org/format/#document-top-level
-    /// https://jsonapi.org/format/#errors
-    /// "The members data and errors MUST NOT coexist in the same document." So when `errors` is detected,
-    /// the type is transformed into a failure document where:
-    /// + `Data` is transformed to `Never`, and data related types `Links` and `Included` are `Never` too.
-    /// + `Errors` is transformed to `[FailureResponse.ErrorObject], and `FailureResponse` is "consumed" to `Never`.
-    /// + `Meta` becomes `FailureResponse.Meta` as the types can be different for success and failure document.
-    /// + `JSONAPI` remains the same.
-    /// To allow fallback to the `ErrorDocument` when decoding an expected success document, decode
-    /// it via ``DecodableDocument`` type.
-    public typealias ErrorDocument = Document<Never, [FailureResponse.ErrorObject], FailureResponse.Meta, JSONAPI, Never, Never, Never>
+                                                                                                          Included: _Included {
 
     /// Create an encodable document where primary data is a single resource object.
     public init<T>(
@@ -54,8 +27,7 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included, FailureResp
             Meta: Encodable,
             JSONAPI: Encodable,
             Links: Encodable,
-            Included == Never,
-            FailureResponse == Never {
+            Included == Never {
         self._data = data?.resourceObject
         if Meta.self != Never.self { _meta = meta() }
         if JSONAPI.self != Never.self { _jsonAPI = jsonAPI() }
@@ -78,8 +50,7 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included, FailureResp
             Meta: Encodable,
             JSONAPI: Encodable,
             Links: Encodable,
-            Included == EncodableIncluded,
-            FailureResponse == Never {
+            Included == EncodableIncluded {
         self._data = data?.resourceObjects.first
         if Meta.self != Never.self { _meta = meta() }
         if JSONAPI.self != Never.self { _jsonAPI = jsonAPI() }
@@ -104,8 +75,7 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included, FailureResp
             Meta: Encodable,
             JSONAPI: Encodable,
             Links: Encodable,
-            Included == Never,
-            FailureResponse == Never {
+            Included == Never {
         self._data = data.map(\.resourceObject)
         if Meta.self != Never.self { _meta = meta() }
         if JSONAPI.self != Never.self { _jsonAPI = jsonAPI() }
@@ -129,8 +99,7 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included, FailureResp
             Meta: Encodable,
             JSONAPI: Encodable,
             Links: Encodable,
-            Included == EncodableIncluded,
-            FailureResponse == Never {
+            Included == EncodableIncluded {
         self._data = data.resourceObjects
         if Meta.self != Never.self { _meta = meta() }
         if JSONAPI.self != Never.self { _jsonAPI = jsonAPI() }
@@ -154,8 +123,7 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included, FailureResp
             Meta: Encodable,
             JSONAPI: Encodable,
             Links == Never,
-            Included == Never,
-            FailureResponse == Never {
+            Included == Never {
         self._errors = [error]
         if Meta.self != Never.self { _meta = meta() }
         if JSONAPI.self != Never.self { _jsonAPI = jsonAPI() }
@@ -171,8 +139,7 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included, FailureResp
             Meta: Encodable,
             JSONAPI: Encodable,
             Links == Never,
-            Included == Never,
-            FailureResponse == Never {
+            Included == Never {
         self._errors = errors
         if Meta.self != Never.self { _meta = meta() }
         if JSONAPI.self != Never.self { _jsonAPI = jsonAPI() }
@@ -258,10 +225,10 @@ extension Document: Encodable where Data: Encodable, Meta: Encodable, JSONAPI: E
     }
 }
 
-extension DecodableDocument: @retroactive Decodable where Success: Decodable, Failure: Decodable {
+extension FailableDocument: @retroactive Decodable where Success: Decodable, Failure: Decodable {
 
     public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: Document<Never, Never, Never, Never, Never, Never, Never>.CodingKey.self)
+        let container = try decoder.container(keyedBy: Document<Never, Never, Never, Never, Never, Never>.CodingKey.self)
         if !container.contains(.errors) {
             self = .success(try Success(from: decoder))
         } else {
@@ -371,6 +338,41 @@ extension Document: Decodable where Data: Decodable, Meta: Decodable, JSONAPI: D
             self._included = try container.decode(Included.self, forKey: .included)
         }
     }
+}
+
+// MARK: -
+
+/// A `Result` wrapper for a "success" document and its "failure" variant when decoding an expected document.
+///
+/// To allow fallback to the error variant of a document when decoding an expected success document, decode
+/// it as this type, accessible via ``Document/FailableWith`` type.
+///
+/// `Failure` represents an error document variant of the expected document.
+/// https://jsonapi.org/format/#document-top-level
+/// https://jsonapi.org/format/#errors
+/// "The members `data` and `errors` MUST NOT coexist in the same document." So when `errors` is detected
+/// during decoding, the type is transformed into a failure document where:
+/// + `Data` is transformed to `Never`, and `data` related types `Links` and `Included` are `Never` too.
+/// + `Errors` is transformed to `[FailureResponse.ErrorObject].
+/// + `Meta` becomes `FailureResponse.Meta` as the types can be different for success and failure document.
+/// + `JSONAPI` remains the same.
+public typealias FailableDocument<Document, FailureResponse>
+= Result<
+    Document,
+    JSONAPI.Document<Never, [FailureResponse.ErrorObject], FailureResponse.Meta, Document.JSONAPI, Never, Never>
+> where Document: DocumentType, Document: Decodable,
+        Document.Data: _PrimaryData, Document.Data: Decodable,
+        Document.Errors.Element == Never,
+        Document.Meta: Decodable,
+        Document.JSONAPI: Decodable,
+        Document.Links: Decodable,
+        Document.Included: _Included, Document.Included: Decodable,
+        FailureResponse: _FailureResponse
+
+public extension Document where Self: Decodable, Errors.Element == Never {
+
+    /// Returns a failable document type, that can result in an error variant of the document defined by `FailureResponse`.
+    typealias FailableWith<FailureResponse> = FailableDocument<Self, FailureResponse> where FailureResponse: _FailureResponse
 }
 
 // MARK: - Utils

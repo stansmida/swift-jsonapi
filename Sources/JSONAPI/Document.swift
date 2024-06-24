@@ -18,17 +18,17 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
 
     /// Create an encodable document where primary data is a single resource object.
     public init<T>(
-        data: T?,
+        data: T,
         meta: @autoclosure () -> Meta = fatalError(),
         jsonAPI: @autoclosure () -> JSONAPI = fatalError(),
         links: @autoclosure () -> Links = fatalError()
-    ) where T: _ResourceObjectConvertible, Data == T.ResourceObject?,
+    ) where T: _ResourceObjectConvertible, Data == T.ResourceObject,
             Errors == Never,
             Meta: Swift.Encodable,
             JSONAPI: Swift.Encodable,
             Links: Swift.Encodable,
             Included == Never {
-        self._data = data?.resourceObject
+        self._data = data.resourceObject
         if Meta.self != Never.self { _meta = meta() }
         if JSONAPI.self != Never.self { _jsonAPI = jsonAPI() }
         if Links.self != Never.self { _links = links() }
@@ -41,7 +41,7 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
     /// - Parameters:
     ///   - sorted: Whether to sort included objects alphabetically (by type and id).
     public init(
-        data: _CompoundResourceObject<CollectionOfOne<Data>>?,
+        data: _CompoundResourceObject<CollectionOfOne<Data>>,
         sorted: Bool = false,
         meta: @autoclosure () -> Meta = fatalError(),
         jsonAPI: @autoclosure () -> JSONAPI = fatalError(),
@@ -51,7 +51,56 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
             JSONAPI: Swift.Encodable,
             Links: Swift.Encodable,
             Included == EncodableIncluded {
-        self._data = data?.resourceObjects.first
+        self._data = data.resourceObjects.first
+        if Meta.self != Never.self { _meta = meta() }
+        if JSONAPI.self != Never.self { _jsonAPI = jsonAPI() }
+        if Links.self != Never.self { _links = links() }
+        if sorted {
+            self._included = data.accumulatingIncluded.values
+                .sorted(by: areInIncreasingOrder)
+                .map(_AnyEncodableResourceObject.init)
+        } else {
+            self._included = data.accumulatingIncluded.values.map(_AnyEncodableResourceObject.init)
+        }
+    }
+
+    /// Create an encodable document where primary data is a nullable single resource object.
+    public init<T>(
+        data: T?,
+        meta: @autoclosure () -> Meta = fatalError(),
+        jsonAPI: @autoclosure () -> JSONAPI = fatalError(),
+        links: @autoclosure () -> Links = fatalError()
+    ) where T: _ResourceObjectConvertible, Data == T.ResourceObject?,
+            Errors == Never,
+            Meta: Swift.Encodable,
+            JSONAPI: Swift.Encodable,
+            Links: Swift.Encodable,
+            Included == Never {
+        self._data = Data?.some(data?.resourceObject)
+        if Meta.self != Never.self { _meta = meta() }
+        if JSONAPI.self != Never.self { _jsonAPI = jsonAPI() }
+        if Links.self != Never.self { _links = links() }
+    }
+
+    /// Create an encodable document where primary data is a nullable single resource object, and has `included` member.
+    ///
+    /// `_CompoundResourceObject` isn't supposed to be initialized directly but via
+    /// ``_ResourceObjectConvertible.including(_:if:include:)`` method.
+    /// - Parameters:
+    ///   - sorted: Whether to sort included objects alphabetically (by type and id).
+    public init<T>(
+        data: _CompoundResourceObject<CollectionOfOne<T>>?,
+        sorted: Bool = false,
+        meta: @autoclosure () -> Meta = fatalError(),
+        jsonAPI: @autoclosure () -> JSONAPI = fatalError(),
+        links: @autoclosure () -> Links = fatalError()
+    ) where T: _ResourceObjectConvertible, Data == T.ResourceObject?,
+            Errors == Never,
+            Meta: Swift.Encodable,
+            JSONAPI: Swift.Encodable,
+            Links: Swift.Encodable,
+            Included == EncodableIncluded {
+        self._data = Data?.some(data?.resourceObjects.first)
         if Meta.self != Never.self { _meta = meta() }
         if JSONAPI.self != Never.self { _jsonAPI = jsonAPI() }
         if Links.self != Never.self { _links = links() }

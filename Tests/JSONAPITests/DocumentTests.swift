@@ -1,6 +1,7 @@
 import JSONAPI
 import XCTest
 
+typealias MyEncodableDocument<Data, Included> = Document<Data, Never, Never, Never, Never, Included> where Data: _PrimaryData, Included: _Included
 typealias MyDocument<Data, Included> = Document<Data, Never, Never, Never, Never, Included> where Data: _PrimaryData, Data: Decodable, Included: _Included, Included: Decodable
 typealias MyError = ErrorObject<UUID, Never, Never, Int, String, Never, Never, Never>
 typealias MyFailureResponse = FailureResponse<MyError, Never>
@@ -14,6 +15,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: User?.none
         )
+        XCTAssertNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject?, Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -31,6 +34,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: ResourceObject<User, User.Attributes, User.Relationships, User.Links, User.Meta>?.none
         )
+        XCTAssertNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject?, Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -48,6 +53,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: ResourceIdentifierObject<User, User.Meta>?.none
         )
+        XCTAssertNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<ResourceIdentifierObject<User, Never>?, Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -66,6 +73,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: User?.some(user)
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject?, Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -98,6 +107,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: ResourceObject<User, User.Attributes, User.Relationships, User.Links, User.Meta>?.some(user.resourceObject)
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject?, Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -130,6 +141,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: ResourceIdentifierObject<User, User.Meta>?.some(user.resourceIdentifierObject)
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<ResourceIdentifierObject<User, Never>?, Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -151,6 +164,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: user
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject, Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -183,6 +198,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: user.resourceObject
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject, Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -215,6 +232,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: user.resourceIdentifierObject
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<ResourceIdentifierObject<User, Never>, Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -236,6 +255,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: users
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<[User.ResourceObject], Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -256,6 +277,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: users.map(\.resourceObject)
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<[User.ResourceObject], Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -276,6 +299,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: users.map(\.resourceIdentifierObject)
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<[ResourceIdentifierObject<User, Never>], Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -299,6 +324,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: users
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<[User.ResourceObject], Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -351,6 +378,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: users.map(\.resourceObject)
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<[User.ResourceObject], Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -403,6 +432,8 @@ final class DocumentTests: XCTestCase {
         let document = Document(
             data: users.map(\.resourceIdentifierObject)
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<[ResourceIdentifierObject<User, Never>], Never>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -431,6 +462,8 @@ final class DocumentTests: XCTestCase {
         let document = try Document(
             data: User?.none?.including(\.avatarID, include: { Image(id: $0, creatorID: 0) })
         )
+        XCTAssertNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject?, EncodableIncluded>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -452,6 +485,8 @@ final class DocumentTests: XCTestCase {
         let document = try Document(
             data: ResourceObject<User, User.Attributes, User.Relationships, User.Links, User.Meta>?.none?.including(\.avatarID, include: { Image(id: $0, creatorID: 0) })
         )
+        XCTAssertNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject?, EncodableIncluded>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -474,6 +509,8 @@ final class DocumentTests: XCTestCase {
         let document = try Document(
             data: User?.some(user)?.including(\.avatarID, include: { Image(id: $0, creatorID: 0) })
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject?, EncodableIncluded>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -521,6 +558,8 @@ final class DocumentTests: XCTestCase {
         let document = try Document(
             data: user?.including(\.avatarID, include: { Image(id: $0, creatorID: 0) })
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject?, EncodableIncluded>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -568,6 +607,8 @@ final class DocumentTests: XCTestCase {
         let document = try Document(
             data: user.including(\.avatarID, include: { Image(id: $0, creatorID: 0) })
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject, EncodableIncluded>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -615,6 +656,8 @@ final class DocumentTests: XCTestCase {
         let document = try Document(
             data: user.including(\.avatarID, include: { Image(id: $0, creatorID: 0) })
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<User.ResourceObject, EncodableIncluded>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -661,6 +704,8 @@ final class DocumentTests: XCTestCase {
         let document = try Document(
             data: [User]().including(\.avatarID, include: { Image(id: $0, creatorID: $0) })
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<[User.ResourceObject], EncodableIncluded>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -684,6 +729,8 @@ final class DocumentTests: XCTestCase {
         let document = try Document(
             data: [User.ResourceObject]().including(\.avatarID, include: { Image(id: $0, creatorID: $0) })
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<[User.ResourceObject], EncodableIncluded>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -712,6 +759,8 @@ final class DocumentTests: XCTestCase {
             data: users.including(\.avatarID, include: { Image(id: $0, creatorID: 0) }),
             sorted: true
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<[User.ResourceObject], EncodableIncluded>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,
@@ -792,6 +841,8 @@ final class DocumentTests: XCTestCase {
             data: users.including(\.avatarID, include: { Image(id: $0, creatorID: 0) }),
             sorted: true
         )
+        XCTAssertNotNil(document.data)
+        XCTAssertEqual(ObjectIdentifier(type(of: document)), ObjectIdentifier(MyEncodableDocument<[User.ResourceObject], EncodableIncluded>.self))
         let encoded = try JSONEncoder.pretty.encode(document)
         XCTAssertEqual(
             encoded.uft8String,

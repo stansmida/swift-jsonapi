@@ -209,6 +209,32 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
     public var included: Included { _included }
 }
 
+// MARK: - Hashable
+
+extension Document: Equatable where Data: Equatable, Errors: Equatable, Meta: Equatable, JSONAPI: Equatable, Links: Equatable, Included: Equatable {
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        (Data.self == Never.self || lhs.data == rhs.data)
+        && (Errors.self == Never.self || lhs.errors == rhs.errors)
+        && (Meta.self == Never.self || lhs.meta == rhs.meta)
+        && (JSONAPI.self == Never.self || lhs.jsonAPI == rhs.jsonAPI)
+        && (Links.self == Never.self || lhs.links == rhs.links)
+        && (Included.self == Never.self || lhs.included == rhs.included)
+    }
+}
+
+extension Document: Hashable where Data: Hashable, Errors: Hashable, Meta: Hashable, JSONAPI: Hashable, Links: Hashable, Included: Hashable {
+    
+    public func hash(into hasher: inout Hasher) {
+        if Data.self != Never.self { hasher.combine(data) }
+        if Errors.self != Never.self { hasher.combine(errors) }
+        if Meta.self != Never.self { hasher.combine(meta) }
+        if JSONAPI.self != Never.self { hasher.combine(jsonAPI) }
+        if Links.self != Never.self { hasher.combine(links) }
+        if Included.self != Never.self { hasher.combine(included) }
+    }
+}
+
 // MARK: - Codable
 
 private extension Document {

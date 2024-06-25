@@ -274,7 +274,7 @@ extension Document: Encodable where Data: Swift.Encodable, Meta: Swift.Encodable
     }
 }
 
-extension FailableDocument: @retroactive Decodable where Success: Decodable, Failure: Decodable {
+extension FailableDocument: @retroactive Decodable where Success: Swift.Decodable, Failure: Swift.Decodable {
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: Document<Never, Never, Never, Never, Never, Never>.CodingKey.self)
@@ -286,7 +286,7 @@ extension FailableDocument: @retroactive Decodable where Success: Decodable, Fai
     }
 }
 
-extension Document: Decodable where Data: Decodable, Meta: Decodable, JSONAPI: Decodable, Links: Decodable, Included: Decodable {
+extension Document: Decodable where Data: Swift.Decodable, Meta: Swift.Decodable, JSONAPI: Swift.Decodable, Links: Swift.Decodable, Included: Swift.Decodable {
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKey.self)
@@ -409,16 +409,16 @@ public typealias FailableDocument<Document, FailureResponse>
 = Result<
     Document,
     JSONAPI.Document<Never, [FailureResponse.ErrorObject], FailureResponse.Meta, Document.JSONAPI, Never, Never>
-> where Document: DocumentType, Document: Decodable,
-        Document.Data: _PrimaryData, Document.Data: Decodable,
+> where Document: DocumentType, Document: Swift.Decodable,
+Document.Data: _PrimaryData, Document.Data: Swift.Decodable,
         Document.Errors.Element == Never,
-        Document.Meta: Decodable,
-        Document.JSONAPI: Decodable,
-        Document.Links: Decodable,
-        Document.Included: _Included, Document.Included: Decodable,
+        Document.Meta: Swift.Decodable,
+        Document.JSONAPI: Swift.Decodable,
+        Document.Links: Swift.Decodable,
+        Document.Included: _Included, Document.Included: Swift.Decodable,
         FailureResponse: _FailureResponse
 
-public extension Document where Self: Decodable, Errors.Element == Never {
+public extension Document where Self: Swift.Decodable, Errors.Element == Never {
 
     /// Returns a failable document type, that can result in an error variant of the document defined by `FailureResponse`.
     typealias FailableWith<FailureResponse> = FailableDocument<Self, FailureResponse> where FailureResponse: _FailureResponse
@@ -445,6 +445,24 @@ public extension Document where Data: Codable, Errors: Codable, Meta: Codable, J
     typealias Encodable = Document<Data, Errors, Meta, JSONAPI, Links, EncodableIncluded>
 }
 
+public extension Document where Data: Codable, Errors: Codable, Meta: Codable, JSONAPI: Codable, Links: Codable, Included == EncodableIncluded {
+
+    /// Document with `included` member can't be `Encodable` and `Decodable` at the same time due to a dynamic nature
+    /// of `EncodableDocument` and `DecodableIncluded`. This allows you for a quick conversion from an encodable
+    /// document type with `included` member to its decodable variant.
+    ///
+    /// - Important: This type can shadow `Swift.Decodable` when working within the document which can result
+    /// in a compile error. In such cases, refer to `Decodable` protocol with qualified symbol (`Swift.Decodable`), e.g.
+    /// ```swift
+    /// extension JSONAPI.Document: @retroactive AsyncRequestDecodable where Self: Swift.Decodable {
+    ///
+    ///     public static func decodeRequest(_ request: Vapor.Request) async throws -> Self {
+    ///        try request.content.decode(Self.self, as: .jsonAPI)
+    ///     }
+    /// }
+    /// ```
+    typealias Decodable = Document<Data, Errors, Meta, JSONAPI, Links, DecodableIncluded>
+}
 
 // MARK: - Utils
 

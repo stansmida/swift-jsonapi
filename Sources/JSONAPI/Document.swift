@@ -300,7 +300,7 @@ extension Document: Encodable where Data: Swift.Encodable, Meta: Swift.Encodable
     }
 }
 
-extension FailableDocument: @retroactive Decodable where Success: Swift.Decodable, Failure: Swift.Decodable {
+extension FailableDocument: Decodable where Success: Swift.Decodable, Failure: Swift.Decodable {
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: Document<Never, Never, Never, Never, Never, Never>.CodingKey.self)

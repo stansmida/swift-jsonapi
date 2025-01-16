@@ -5,7 +5,7 @@
 /// + `EncodableIncluded` when building a compound document for encoding.
 /// + `DecodableIncluded` when decoding a received compound document.
 /// + `Never` for not a compound document (a document without `included` member).
-public protocol _Included {}
+public protocol _Included: Sendable {}
 
 extension Never: _Included {}
 
@@ -15,7 +15,7 @@ public typealias EncodableIncluded = [_AnyEncodableResourceObject]
 extension EncodableIncluded: _Included {}
 
 /// An element of `EncodableIncluded`.
-public struct _AnyEncodableResourceObject: Encodable {
+public struct _AnyEncodableResourceObject: Encodable, Sendable {
 
     let resourceObject: any _ResourceObject
 

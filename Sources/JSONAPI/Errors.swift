@@ -3,22 +3,22 @@
 /// A constraint for `Document.Erros` generic parameter to be either:
 /// + `Never`
 /// + `[ErrorObject]`
-public protocol _Errors where Self: Sequence, Element: _ErrorObject {}
+public protocol _Errors where Self: Sequence, Self: Sendable, Element: _ErrorObject {}
 
 extension Never: _Errors {}
 extension Array: _Errors where Element: _ErrorObject {}
 
 /// A helper protocol to work with ``ResourceObject`` generics until Swift gains parametrized generics.
-public protocol _ErrorObject: Error, Identifiable where ID: Codable {
+public protocol _ErrorObject: Error, Identifiable, Sendable where ID: Codable {
 
     // TODO: https://jsonapi.org/format/#error-objects
-    associatedtype Links: Codable
+    associatedtype Links: _Links
     associatedtype Status: LosslessStringConvertible
     associatedtype Code: LosslessStringConvertible
     associatedtype Title: LosslessStringConvertible
     associatedtype Detail: LosslessStringConvertible
     associatedtype Source: Codable
-    associatedtype Meta: Codable
+    associatedtype Meta: Codable, Sendable
 
     init(
         id: () -> ID,
@@ -50,14 +50,14 @@ enum ErrorObjectCodingKey: CodingKey {
 /// A type that represents an error object element in the document's `errors` member.
 /// - Note: [`id` not restricted to `String`?](https://jsonapi.org/format/#error-objects)
 public struct ErrorObject<ID, Links, Status, Code, Title, Detail, Source, Meta>: _ErrorObject where
-ID: Codable, ID: Hashable,
-Links: Codable,
-Status: LosslessStringConvertible,
-Code: LosslessStringConvertible,
-Title: LosslessStringConvertible,
-Detail: LosslessStringConvertible,
-Source: Codable,
-Meta: Codable
+ID: Codable, ID: Hashable, ID: Sendable,
+Links: _Links,
+Status: LosslessStringConvertible, Status: Sendable,
+Code: LosslessStringConvertible, Code: Sendable,
+Title: LosslessStringConvertible, Title: Sendable,
+Detail: LosslessStringConvertible, Detail: Sendable,
+Source: Codable, Source: Sendable,
+Meta: Codable, Meta: Sendable
 {
     public init(
         id: @autoclosure () -> ID = fatalError(),
@@ -125,13 +125,13 @@ extension Document: Error where Errors.Element: _ErrorObject {}
 /// A constraint for `Document.FailureResponse` generic parameter to be either:
 /// + `FailureResponse`
 /// + `Never`
-public protocol _FailureResponse {
+public protocol _FailureResponse: Sendable {
     associatedtype ErrorObject: _ErrorObject
-    associatedtype Meta: Decodable
+    associatedtype Meta: Decodable, Sendable
 }
 
 /// A type that defines the document's `Errors.Element` and `Meta` types for failure response.
-public enum FailureResponse<ErrorObject, Meta>: _FailureResponse where ErrorObject: _ErrorObject, Meta: Decodable {}
+public enum FailureResponse<ErrorObject, Meta>: _FailureResponse where ErrorObject: _ErrorObject, Meta: Decodable, Meta: Sendable {}
 
 extension Never: _FailureResponse {
     public typealias ErrorObject = Never

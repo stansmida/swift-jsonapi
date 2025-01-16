@@ -8,7 +8,7 @@
 ///   nullable to-one relationship to allow an empty value.
 /// + ``RelationshipObject/ToMany`` to to-many relationship. Here, `null` value is not allowed,
 ///   but only an empty array.
-public protocol _RelationshipObject {
+public protocol _RelationshipObject: Sendable {
     associatedtype ResourceRepresentable: JSONAPI.ResourceRepresentable
     var resourceIdentifierObjects: [ResourceIdentifierObject<ResourceRepresentable, ResourceRepresentable.Meta>] { get }
 }

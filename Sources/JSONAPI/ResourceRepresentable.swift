@@ -5,13 +5,14 @@
 /// This type can be represented as:
 /// + Resource object via ``ResourceObject/init(_:)``, or ``ResourceRepresentable/resourceObject``.
 /// + Resource identifier object via ``ResourceIdentifierObject/init(_:)``, or ``ResourceRepresentable/resourceIdentifierObject``.
-public protocol ResourceRepresentable: _ResourceObjectConvertible where Self: Identifiable,
-                                            Type_: LosslessStringConvertible,
-                                            ID: LosslessStringConvertible,
-                                            Attributes: Codable,
-                                            Relationships: Codable,
-                                            Links: Codable,
-                                            Meta: Codable {
+public protocol ResourceRepresentable: _ResourceObjectConvertible
+where Self: Identifiable,
+      Type_: LosslessStringConvertible,
+      ID: LosslessStringConvertible, ID: Sendable,
+      Attributes: Codable, Attributes: Sendable,
+      Relationships: Codable, Relationships: Sendable,
+      Links: _Links,
+      Meta: Codable, Meta: Sendable {
 
     // Ideally backticked `Type` but [it is broken](https://github.com/apple/swift/issues/52303)
     associatedtype Type_

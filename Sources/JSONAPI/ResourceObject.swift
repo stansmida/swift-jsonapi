@@ -21,11 +21,12 @@
 /// - SeeAlso: ``ResourceIdentifierObject`` is a typealias for this type that represents
 /// a resource identifier object.
 /// - SeeAlso: ``ResourceRepresentable``
-public struct ResourceObject<T, Attributes, Relationships, Links, Meta>: _ResourceObject where T: ResourceRepresentable,
-                                                                                               Attributes: Codable,
-                                                                                               Relationships: Codable,
-                                                                                               Links: Codable,
-                                                                                               Meta: Codable {
+public struct ResourceObject<T, Attributes, Relationships, Links, Meta>: _ResourceObject
+where T: ResourceRepresentable,
+      Attributes: Codable, Attributes: Sendable,
+      Relationships: Codable, Relationships: Sendable,
+      Links: _Links,
+      Meta: Codable, Meta: Sendable {
 
     public typealias ResourceRepresentable = T
 
@@ -74,7 +75,7 @@ public struct ResourceObject<T, Attributes, Relationships, Links, Meta>: _Resour
 
 /// A type that represents JSON:API resource identifier object.
 /// https://jsonapi.org/format/#document-resource-identifier-objects
-public typealias ResourceIdentifierObject<T, Meta> = ResourceObject<T, Never, Never, Never, Meta> where T: ResourceRepresentable, Meta: Codable
+public typealias ResourceIdentifierObject<T, Meta> = ResourceObject<T, Never, Never, Never, Meta> where T: ResourceRepresentable, Meta: Codable, Meta: Sendable
 
 extension ResourceIdentifierObject {
 
@@ -116,7 +117,7 @@ public protocol _ResourceObjectConvertible {
 
 // MARK: - Coding
 
-public enum ResourceObjectCodingKey: CodingKey {
+public enum ResourceObjectCodingKey: CodingKey, Sendable {
     case type, id, lid, attributes, relationships, links, meta
 }
 
@@ -197,7 +198,7 @@ extension ResourceObject: Hashable where T.Type_: Hashable, T.ID: Hashable, Attr
 
 /// A unique reference to a resource object in another part of the document.
 /// https://jsonapi.org/format/#document-compound-documents
-public struct CompositeKey: Hashable {
+public struct CompositeKey: Hashable, Sendable {
 
     public init<T, U>(_ resourceIdentifierObject: ResourceIdentifierObject<T, U>) {
         self.init(type: String(T.type), id: String(resourceIdentifierObject.id))

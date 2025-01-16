@@ -2,19 +2,23 @@
 import Foundation
 
 /// A helper protocol to work with ``Document`` generics until Swift gains parametrized generics.
-public protocol DocumentType {
+public protocol DocumentType: Sendable {
     associatedtype Data: _PrimaryData
     associatedtype Errors: _Errors
-    associatedtype Meta
-    associatedtype JSONAPI
-    associatedtype Links
+    associatedtype Meta: Sendable
+    associatedtype JSONAPI: Sendable
+    associatedtype Links: _Links
     associatedtype Included: _Included
 }
 
 /// - Todo: Extensions don't have their generic parameter yet. These could perhaps get a variadic parameter `each Extension`?
-public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentType where Data: _PrimaryData,
-                                                                                         Errors: _Errors,
-                                                                                         Included: _Included {
+public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentType
+where Data: _PrimaryData,
+      Errors: _Errors,
+      Meta: Sendable,
+      JSONAPI: Sendable,
+      Links: _Links,
+      Included: _Included {
 
     /// Create an encodable document where primary data is a single resource object.
     public init<T>(
@@ -26,7 +30,7 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
             Errors == Never,
             Meta: Swift.Encodable,
             JSONAPI: Swift.Encodable,
-            Links: Swift.Encodable,
+            Links: _Links,
             Included == Never {
         self._data = data.resourceObject
         if Meta.self != Never.self { _meta = meta() }
@@ -49,7 +53,7 @@ public struct Document<Data, Errors, Meta, JSONAPI, Links, Included>: DocumentTy
     ) where Errors == Never,
             Meta: Swift.Encodable,
             JSONAPI: Swift.Encodable,
-            Links: Swift.Encodable,
+            Links: _Links,
             Included == EncodableIncluded {
         self._data = data.resourceObjects.first
         if Meta.self != Never.self { _meta = meta() }

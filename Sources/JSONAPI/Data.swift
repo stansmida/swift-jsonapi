@@ -6,7 +6,7 @@
 /// + `[some _ResourceObject]`
 ///
 /// https://jsonapi.org/format/#document-top-level
-public protocol _PrimaryData {
+public protocol _PrimaryData: Sendable {
     associatedtype ResourceObjectType: _ResourceObject
 }
 
